@@ -116,7 +116,7 @@ public function category_delete($id)
 
 public function products()
 {
-    $products = Product::orderBy('id','DESC')->paginate(10);
+    $products = Product::OrderBy('created_at','DESC')->paginate(10);
     return view('admin.products',compact('products'));
 
 }
@@ -424,4 +424,10 @@ public function vendorRequests()
 
         return redirect()->route('admin.vendor.requests')->with('success', 'Vendor request rejected.');
     }
+
+    public function product_view($id)
+{
+    $product = Product::with(['category', 'brand'])->findOrFail($id);
+    return view('admin.product-view', compact('product'));
+}
 }

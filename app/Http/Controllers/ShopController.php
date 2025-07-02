@@ -9,10 +9,21 @@ use Illuminate\Http\Request;
 
 class ShopController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::orderby('id', 'DESC')->paginate(12);
+        $query = Product::query();
+        
+        // Filter by category if provided
+        if ($request->has('category') && $request->category) {
+            $category = Category::where('slug', $request->category)->first();
+            if ($category) {
+                $query->where('category_id', $category->id);
+            }
+        }
+        
+        $products = $query->orderby('id', 'DESC')->paginate(12);
         $categories = Category::orderBy('name')->get();
+        
         return view('shop', compact('products', 'categories'));
     }
 
