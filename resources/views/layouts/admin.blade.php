@@ -127,12 +127,6 @@
                                         </li>
                                     </ul>
                                 </li>
-                                <li class="menu-item">
-                                    <a href="{{ route('admin.vendor.requests') }}" class="">
-                                        <div class="icon"><i class="icon-users"></i></div>
-                                        <div class="text">Vendor Requests</div>
-                                    </a>
-                                </li>
 
                                 <li class="menu-item">
                                     <a href="slider.html" class="">

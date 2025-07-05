@@ -24,8 +24,6 @@ Route::delete('/cart/clear', [CartController::class, 'empty_cart'])->name('cart.
 
 Route::middleware(['auth'])->group(function(){
     Route::get('/account-dashboard',[UserController::class,'index'])->name('user.index');
-    Route::get('/vendor-request',[UserController::class,'requestVendor'])->name('user.vendor.request');
-    Route::post('/vendor-request',[UserController::class,'storeVendorRequest'])->name('user.vendor.request.store');
 });
 
 Route::middleware(['auth', AuthAdmin::class])->group(function(){
@@ -46,11 +44,7 @@ Route::middleware(['auth', AuthAdmin::class])->group(function(){
     Route::get('/admin/product/{id}/edit',[AdminController::class,'product_edit'])->name('admin.product.edit');
     Route::put('/admin/product/update',[AdminController::class,'product_update'])->name('admin.product.update');
     Route::delete('/admin/product/{id}/delete',[AdminController::class,'product_delete'])->name('admin.product.delete');
-    
-    // Vendor request management routes
-    Route::get('/admin/vendor-requests',[AdminController::class,'vendorRequests'])->name('admin.vendor.requests');
-    Route::post('/admin/vendor-requests/{id}/approve',[AdminController::class,'approveVendorRequest'])->name('admin.vendor.request.approve');
-    Route::post('/admin/vendor-requests/{id}/reject',[AdminController::class,'rejectVendorRequest'])->name('admin.vendor.request.reject');
+
 });
 
 

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\VendorRequest;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -116,9 +115,29 @@ public function category_delete($id)
 
 public function products()
 {
-    $products = Product::OrderBy('created_at','DESC')->paginate(10);
-    return view('admin.products',compact('products'));
+    $user = Auth::user();
+    
+    // Main admin can see all products, shop owners can only see their own
+    if ($user->isMainAdmin()) {
+        $products = Product::with('user')->orderBy('created_at','DESC')->paginate(10);
+    } else {
+        $products = Product::where('user_id', $user->id)->orderBy('created_at','DESC')->paginate(10);
+    }
+    
+    return view('admin.products', compact('products'));
+}
 
+public function product_view($id)
+{
+    $product = Product::with(['category', 'brand', 'user'])->find($id);
+    $user = Auth::user();
+    
+    // Check if user has permission to view this product
+    if (!$user->isMainAdmin() && !$product->isOwnedBy($user)) {
+        return redirect()->route('admin.products')->with('error', 'You do not have permission to view this product.');
+    }
+    
+    return view('admin.product-view', compact('product'));
 }
 
 public function product_add()
@@ -146,6 +165,7 @@ public function product_store(Request $request)
         'image'=>'required|mimes:png,jpg,jpeg|max:2048'            
     ]);
     $product = new Product();
+    $product->user_id = Auth::id(); // Associate product with current user
     $product->name = $request->name;
     $product->slug = Str::slug($request->name);
     $product->short_description = $request->short_description;
@@ -228,6 +248,13 @@ public function GenerateThumbnailImage($image, $file_name)
 public function product_edit($id)
 {
     $product = Product::find($id);
+    $user = Auth::user();
+    
+    // Check if user has permission to edit this product
+    if (!$user->isMainAdmin() && !$product->isOwnedBy($user)) {
+        return redirect()->route('admin.products')->with('error', 'You do not have permission to edit this product.');
+    }
+    
     $categories = Category::Select('id','name')->orderBy('name')->get();
     $brands = Brand::Select('id','name')->orderBy('name')->get();
     return view('admin.product-edit',compact('product','categories','brands'));
@@ -252,6 +279,12 @@ public function product_update(Request $request)
     ]);
     
     $product = Product::find($request->id);
+    $user = Auth::user();
+    
+    // Check if user has permission to update this product
+    if (!$user->isMainAdmin() && !$product->isOwnedBy($user)) {
+        return redirect()->route('admin.products')->with('error', 'You do not have permission to update this product.');
+    }
     $product->name = $request->name;
     $product->slug = $request->slug;
     $product->short_description = $request->short_description;
@@ -321,7 +354,13 @@ return redirect()->route('admin.products')->with('status', 'Product has been upd
 
 public function product_delete($id)
 {
-    $product = Product::find($id);        
+    $product = Product::find($id);
+    $user = Auth::user();
+    
+    // Check if user has permission to delete this product
+    if (!$user->isMainAdmin() && !$product->isOwnedBy($user)) {
+        return redirect()->route('admin.products')->with('error', 'You do not have permission to delete this product.');
+    }        
     if(File::exists(public_path('uploads/products').'/'.$product->image)) 
     {
         File::delete(public_path('uploads/products').'/'.$product->image);
@@ -344,90 +383,4 @@ public function product_delete($id)
     return redirect()->route('admin.products')->with('status','Record has been deleted successfully !');
 } 
 
-public function vendor_requests()
-{
-    $vendor_requests = VendorRequest::orderBy('id','DESC')->paginate(10);
-    return view('admin.vendor-requests',compact('vendor_requests'));
-}
-
-public function vendor_request_view($id)
-{
-    $vendor_request = VendorRequest::find($id);
-    return view('admin.vendor-request-view',compact('vendor_request'));
-}
-
-public function vendor_request_approve($id)
-{
-    $vendor_request = VendorRequest::find($id);
-    $vendor_request->status = 'approved';
-    $vendor_request->save();
-
-    // Send notification to the vendor
-    // ...
-
-    return redirect()->route('admin.vendor.requests')->with('status', 'Vendor request approved successfully!');
-}
-
-public function vendor_request_decline($id)
-{
-    $vendor_request = VendorRequest::find($id);
-    $vendor_request->status = 'declined';
-    $vendor_request->save();
-
-    // Send notification to the vendor
-    // ...
-
-    return redirect()->route('admin.vendor.requests')->with('status', 'Vendor request declined successfully!');
-}
-
-public function vendorRequests()
-    {
-        $vendorRequests = VendorRequest::with('user')->orderBy('created_at', 'desc')->paginate(10);
-        return view('admin.vendor-requests', compact('vendorRequests'));
-    }
-
-    public function approveVendorRequest(Request $request, $id)
-    {
-        $vendorRequest = VendorRequest::findOrFail($id);
-        
-        $request->validate([
-            'admin_notes' => 'nullable|string|max:500',
-        ]);
-
-        $vendorRequest->update([
-            'status' => 'approved',
-            'approved_at' => now(),
-            'approved_by' => Auth::id(),
-            'admin_notes' => $request->admin_notes,
-        ]);
-
-        // Update user type to admin (since vendor/shop owner should have admin role)
-        $vendorRequest->user->update([
-            'utype' => 'ADM'
-        ]);
-
-        return redirect()->route('admin.vendor.requests')->with('success', 'Vendor request approved successfully!');
-    }
-
-    public function rejectVendorRequest(Request $request, $id)
-    {
-        $vendorRequest = VendorRequest::findOrFail($id);
-        
-        $request->validate([
-            'admin_notes' => 'required|string|max:500',
-        ]);
-
-        $vendorRequest->update([
-            'status' => 'rejected',
-            'admin_notes' => $request->admin_notes,
-        ]);
-
-        return redirect()->route('admin.vendor.requests')->with('success', 'Vendor request rejected.');
-    }
-
-    public function product_view($id)
-{
-    $product = Product::with(['category', 'brand'])->findOrFail($id);
-    return view('admin.product-view', compact('product'));
-}
 }

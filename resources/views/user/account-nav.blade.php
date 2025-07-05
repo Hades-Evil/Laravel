@@ -4,12 +4,6 @@
             <li><a href="account-address.html" class="menu-link menu-link_us-s">Addresses</a></li>
             <li><a href="account-details.html" class="menu-link menu-link_us-s">Account Details</a></li>
             <li><a href="account-wishlist.html" class="menu-link menu-link_us-s">Wishlist</a></li>
-            {{-- Only show Become Vendor button if user is not admin and doesn't have pending/approved vendor requests --}}
-            @if(!Auth::user()->isAdmin())
-                @if(!Auth::user()->hasVendorRequest() && !Auth::user()->hasApprovedVendorRequest())
-                    <li><a href="{{ route('user.vendor.request') }}" class="menu-link menu-link_us-s">Become Vendor</a></li>
-                @endif
-            @endif
             
             <li>
                 <form method="POST" action="{{ route('logout') }}" id="logout-form">

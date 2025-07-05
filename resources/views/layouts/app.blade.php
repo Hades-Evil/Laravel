@@ -300,15 +300,40 @@
       <div class="container">
         <div class="overflow-hidden">
           <ul class="navigation__list list-unstyled position-relative">
-            <li class="navigation__item">
-              <a href="{{route('home.index')}}" class="navigation__link">Home</a>
-            </li>
-            <li class="navigation__item">
-              <a href="{{route('shop.index')}}" class="navigation__link">Shop</a>
-            </li>
-            <li class="navigation__item">
-              <a href="{{route('cart.index')}}" class="navigation__link">Cart</a>
-            </li>
+            @guest
+              <li class="navigation__item">
+                <a href="{{route('home.index')}}" class="navigation__link">Home</a>
+              </li>
+              <li class="navigation__item">
+                <a href="{{route('shop.index')}}" class="navigation__link">Shop</a>
+              </li>
+              <li class="navigation__item">
+                <a href="{{route('cart.index')}}" class="navigation__link">Cart</a>
+              </li>
+            @else
+              @if(Auth::user()->isMainAdmin())
+                {{-- Main admin only sees admin panel link --}}
+                <li class="navigation__item">
+                  <a href="{{route('admin.index')}}" class="navigation__link" style="color: #007bff; font-weight: bold;">Admin Dashboard</a>
+                </li>
+              @else
+                {{-- Shop owners and regular users see all navigation --}}
+                <li class="navigation__item">
+                  <a href="{{route('home.index')}}" class="navigation__link">Home</a>
+                </li>
+                <li class="navigation__item">
+                  <a href="{{route('shop.index')}}" class="navigation__link">Shop</a>
+                </li>
+                <li class="navigation__item">
+                  <a href="{{route('cart.index')}}" class="navigation__link">Cart</a>
+                </li>
+                @if(Auth::user()->isShopOwner())
+                  <li class="navigation__item">
+                    <a href="{{route('admin.index')}}" class="navigation__link" style="color: #007bff; font-weight: bold;">Admin Panel</a>
+                  </li>
+                @endif
+              @endif
+            @endguest
             <li class="navigation__item">
               <a href="about.html" class="navigation__link">About</a>
             </li>
@@ -389,15 +414,40 @@
 
         <nav class="navigation">
           <ul class="navigation__list list-unstyled d-flex">
-            <li class="navigation__item">
-              <a href="{{route('home.index') }}" class="navigation__link">Home</a>
-            </li>
-            <li class="navigation__item">
-              <a href="{{route('shop.index')}}" class="navigation__link">Shop</a>
-            </li>
-            <li class="navigation__item">
-              <a href="{{route('cart.index')}}" class="navigation__link">Cart</a>
-            </li>
+            @guest
+              <li class="navigation__item">
+                <a href="{{route('home.index') }}" class="navigation__link">Home</a>
+              </li>
+              <li class="navigation__item">
+                <a href="{{route('shop.index')}}" class="navigation__link">Shop</a>
+              </li>
+              <li class="navigation__item">
+                <a href="{{route('cart.index')}}" class="navigation__link">Cart</a>
+              </li>
+            @else
+              @if(Auth::user()->isMainAdmin())
+                {{-- Main admin only sees admin panel link --}}
+                <li class="navigation__item">
+                  <a href="{{route('admin.index')}}" class="navigation__link" style="color: #007bff; font-weight: bold;">Admin Dashboard</a>
+                </li>
+              @else
+                {{-- Shop owners and regular users see all navigation --}}
+                <li class="navigation__item">
+                  <a href="{{route('home.index') }}" class="navigation__link">Home</a>
+                </li>
+                <li class="navigation__item">
+                  <a href="{{route('shop.index')}}" class="navigation__link">Shop</a>
+                </li>
+                <li class="navigation__item">
+                  <a href="{{route('cart.index')}}" class="navigation__link">Cart</a>
+                </li>
+                @if(Auth::user()->isShopOwner())
+                  <li class="navigation__item">
+                    <a href="{{route('admin.index')}}" class="navigation__link" style="color: #007bff; font-weight: bold;">Admin Panel</a>
+                  </li>
+                @endif
+              @endif
+            @endguest
             <li class="navigation__item">
               <a href="about.html" class="navigation__link">About</a>
             </li>

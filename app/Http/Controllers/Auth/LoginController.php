@@ -28,6 +28,26 @@ class LoginController extends Controller
     protected $redirectTo = '/';
 
     /**
+     * Get the post-login redirect path based on user type.
+     * Admin seeder account goes directly to admin dashboard.
+     * Shop owners (registered admins) can access the shop.
+     *
+     * @return string
+     */
+    public function redirectTo()
+    {
+        $user = auth()->user();
+        
+        // Check if this is the main admin seeder account
+        if ($user->isMainAdmin()) {
+            return '/admin';
+        }
+        
+        // All other users (including shop owners) go to the shop
+        return '/';
+    }
+
+    /**
      * Create a new controller instance.
      *
      * @return void

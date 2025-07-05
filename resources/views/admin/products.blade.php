@@ -41,6 +41,11 @@
                                                 <p class="alert alert-success">{{session('status')}}</p>
                                             </div>
                                             @endif
+                                            @if (session('error'))
+                                            <div class="alert alert-danger text-center">
+                                                <p class="alert alert-danger">{{session('error')}}</p>
+                                            </div>
+                                            @endif
                                         <table class="table table-striped table-bordered">
                                             <thead>
                                                 <tr>
@@ -51,6 +56,9 @@
                                                     <th>SKU</th>
                                                     <th>Category</th>
                                                     <th>Brand</th>
+                                                    @if(auth()->user()->isMainAdmin())
+                                                    <th>Vendor</th>
+                                                    @endif
                                                     <th>Featured</th>
                                                     <th>Stock</th>
                                                     <th>Quantity</th>
@@ -75,6 +83,9 @@
                                                     <td>{{$product->SKU}}</td>
                                                     <td>{{$product->category->name}}</td>
                                                     <td>{{$product->brand ? $product->brand->name : 'No Brand'}}</td>
+                                                    @if(auth()->user()->isMainAdmin())
+                                                    <td>{{$product->user ? $product->user->name : 'No Vendor'}}</td>
+                                                    @endif
                                                     <td>{{$product->featured == 0? "No":"Yes"}}</td>
                                                     <td>{{$product->stock_status}}</td>
                                                     <td>{{$product->quantity}}</td>

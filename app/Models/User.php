@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -33,11 +32,6 @@ class User extends Authenticatable
         ];
     }
 
-    public function vendorRequests(): HasMany
-    {
-        return $this->hasMany(VendorRequest::class);
-    }
-
     public function isAdmin(): bool
     {
         return $this->utype === 'ADM';
@@ -48,13 +42,29 @@ class User extends Authenticatable
         return $this->utype === 'USR';
     }
 
-    public function hasVendorRequest(): bool
+    /**
+     * Check if this is the main admin seeder account
+     * @return bool
+     */
+    public function isMainAdmin(): bool
     {
-        return $this->vendorRequests()->where('status', 'pending')->exists();
+        return $this->isAdmin() && $this->email === 'admin2@gmail.com';
     }
 
-    public function hasApprovedVendorRequest(): bool
+    /**
+     * Check if this is a shop owner (registered admin, not seeder admin)
+     * @return bool
+     */
+    public function isShopOwner(): bool
     {
-        return $this->vendorRequests()->where('status', 'approved')->exists();
+        return $this->isAdmin() && $this->email !== 'admin2@gmail.com';
+    }
+    
+    /**
+     * Get all products owned by this user
+     */
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'user_id');
     }
 }
